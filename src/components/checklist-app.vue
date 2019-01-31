@@ -21,24 +21,26 @@
                     {{ checklists[checklistKey].name }}
                 </option>
             </select>
-            <div class="btn-group">
-                <a 
-                    v-if = "checklistKeys.length > 0" 
-                    class="btn btn-default"
-                    @click.prevent = "edit">edit</a>
-                <a 
-                    v-if = "checklistKeys.length > 0" 
-                    class="btn btn-default"
-                    @click.prevent = "deleteThisChecklist">delete</a>
+            <div class="btn-group-center">
+                <div class="btn-group btn-group-center">
+                    <a 
+                        v-if = "checklistKeys.length > 0" 
+                        class="btn btn-default"
+                        @click.prevent = "edit">edit</a>
+                    <a 
+                        v-if = "checklistKeys.length > 0" 
+                        class="btn btn-default"
+                        @click.prevent = "deleteThisChecklist">delete</a>
                 
-                <a 
-                    v-if = "checklistKeys.length > 0" 
-                    class="btn btn-default" 
-                    @click.prevent = "resetThisChecklist">reset
-                </a>
-                <a 
-                    class="btn btn-default" 
-                    @click.prevent = "makeNewChecklist">new</a>
+                    <a 
+                        v-if = "checklistKeys.length > 0" 
+                        class="btn btn-default" 
+                        @click.prevent = "resetThisChecklist">reset
+                    </a>
+                    <a 
+                        class="btn btn-success" 
+                        @click.prevent = "makeNewChecklist">new</a>
+                </div>
             </div>
             <div 
                 class = "usage-panel">
@@ -80,6 +82,7 @@ export default {
     },
     data () {
         return {
+            appName : "Check",
             checklists : {},
             baseNewChecklist : {
                 checklistName : "",
@@ -127,7 +130,7 @@ export default {
             let item = this.currentChecklistObject.items.filter(item => item.key == key)[0];
             window.item = item;
             if (item.done == true) {
-                if(confirm("Uncheck this item?")) {
+                if(confirm("Uncheck this item?", this.appName)) {
                     item.done = false;
                 }
             } else {
@@ -138,7 +141,7 @@ export default {
             this.persist();
         },
         resetThisChecklist () {
-            if (confirm("Reset the current checklist?")) {
+            if (confirm("Reset the current checklist?", this.appName)) {
                 let list = this.currentChecklistObject.items;
                 for (let i = 0; i < list.length; i++) {
                     list[i].done = false;
@@ -212,7 +215,7 @@ export default {
             this.status = "new";
         },
         deleteThisChecklist () {
-            if (confirm("Delete this checklist?  (There is no undo.)")) {
+            if (confirm("Delete this checklist?  (There is no undo.)", this.appName)) {
                 this.localStore.removeItem(this.currentChecklistKey);
                 this.$delete(this.checklists, this.currentChecklistKey);
                 this.currentChecklistKey = this.checklistKeys[0];
@@ -223,12 +226,14 @@ export default {
 </script>
 <style lang="scss">
 .checklist-app {
+    min-width: 350px;
+    padding-bottom: 10px;
     .usage-panel {
         margin-top: 1em;
     }
     .item {
         font-weight: bold;
-        font-size: 16pt;
+        font-size: 13pt;
     }
     .list-group-item:nth-child(odd) {
         background-color:rgb(201, 219, 236);
@@ -243,6 +248,12 @@ export default {
     h2 {
         font-size: 130%;
         font-weight: bold;
+    }
+    .btn-group-center {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
     }
     select, textarea, input[type="text"], input[type="password"], input[type="datetime"], input[type="datetime-local"], input[type="date"], input[type="month"], input[type="time"], input[type="week"], input[type="number"], input[type="email"], input[type="url"], input[type="search"], input[type="tel"], input[type="color"] { font-size: 16px; }
 }

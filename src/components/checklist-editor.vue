@@ -1,7 +1,9 @@
 <template>
     <div class="checklist-editor">
         <label>Checklist Name</label>
-        <form @submit.prevent = "">
+        <form 
+            class= "checklist-name" 
+            @submit.prevent = "">
             <input 
                 v-model = "checklistName" 
                 class="form-control" 
@@ -14,10 +16,10 @@
                 class="list-group-item flex-item"
             >
                 <div class="row">
-                    <div class="col-sm-7">
+                    <div class="col-xs-7">
                         <span class="item">{{ index + 1 }} : {{ item.listItemText }}</span>
                     </div>
-                    <div class="col-sm-5">
+                    <div class="col-xs-5">
                         <div style="text-align:right">
                             <button
                                 class="btn btn-danger remove-button"
@@ -52,9 +54,9 @@
             />
             <input
                 :disabled = "newItemInput == ''"
-                class="btn btn-primary add-button"
+                class="btn btn-default add-button"
                 type="submit"
-                value = "add"
+                value = "add new item"
             />
         </form>
         <a 
@@ -126,7 +128,7 @@ export default {
             this.newItemInput = "";
         },
         deleteItem (index) {
-            if(confirm("Remove item \"" + this.itemList[index].listItemText + "\"")) {
+            if(confirm("Remove item \"" + this.itemList[index].listItemText + "\"", "Check")) {
                 this.itemList.splice(index,1);
             }
         },
@@ -157,7 +159,7 @@ export default {
             });
         },
         cancel () {
-            if (confirm("Discard changes?")) {
+            if (confirm("Discard changes?", "Check")) {
                 this.$emit("event_cancel");
             }
         }
@@ -166,6 +168,12 @@ export default {
 </script>
 <style lang="scss">
 .checklist-editor {
+    .checklist-name {
+        margin-bottom:1em;
+    }
+    .add-button {
+        margin-top: 1em;
+    }
     .flex-item {
         .form-box {
             margin-bottom: 2em;
