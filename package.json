@@ -1,11 +1,12 @@
 {
-  "name": "xerocross.check",
+  "name": "check-desktop",
   "version": "1.0.1",
   "description": "A simple checklist app",
-  "main": "dist/xerocross.check.js",
+  "main": "check-desktop.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack",
+    "build-dev" : "webpack --mode=development",
     "dev": "cross-env NODE_ENV=dev node app.js",
     "local": "cross-env NODE_ENV=local webpack-dev-server --hot --inline",
     "heroku-postbuild": "NODE_ENV=production webpack",
@@ -16,10 +17,6 @@
   ],
   "author": "Adam Cross",
   "license": "0BSD",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/xerocross/xerocross.check.git"
-  },
   "dependencies": {
     "babel-core": "^6.26.3",
     "babel-eslint": "^10.0.1",

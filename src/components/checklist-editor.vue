@@ -73,11 +73,13 @@
 <script>
 import {DrawerDiv} from "cross-vue-base";
 import {StringHash} from "../helpers/string-hash.js";
+import ConfirmMixin from "../confirm-mixin.js";
 
 export default {
     components : {
         DrawerDiv
     },
+    mixins : [ConfirmMixin],
     props : {
         currentChecklist : {
             type : Object,
@@ -128,7 +130,7 @@ export default {
             this.newItemInput = "";
         },
         deleteItem (index) {
-            if(confirm("Remove item \"" + this.itemList[index].listItemText + "\"", "Check")) {
+            if(this.confirmModal(`Remove item "${this.itemList[index].listItemText}"?`)) {
                 this.itemList.splice(index,1);
             }
         },
@@ -150,7 +152,8 @@ export default {
         },
         save () {
             if (this.checklistName == "") {
-                alert("Checklist Name is required");
+                this.alertModal("Checklist name is required.");
+
                 return;
             }
             this.$emit("event_save", {
@@ -159,7 +162,7 @@ export default {
             });
         },
         cancel () {
-            if (confirm("Discard changes?", "Check")) {
+            if (this.confirmModal("Discard changes?")) {
                 this.$emit("event_cancel");
             }
         }

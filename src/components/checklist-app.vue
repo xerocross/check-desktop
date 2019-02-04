@@ -67,11 +67,16 @@
 <script>
 import ChecklistEditor from "./checklist-editor.vue";
 import ChecklistDisplay from "./checklist-display.vue";
-import {StoreLocal} from "cross-js-base";
 import {StringHash} from "../helpers/string-hash.js";
 import Checklist from "../helpers/checklist.js";
 import { DrawerDiv } from "cross-vue-base";
 import SignupDiv from "./signup-div.vue";
+import ConfirmMixin from "../confirm-mixin.js";
+import MainStorageWrapper from "../main-storage-wrapper.js";
+import StorageWrapper from "../storage-wrapper.js";
+const electron = require('electron');
+const ipc = electron.ipcRenderer;
+import MainStorage from "../main-storage.js";
 
 export default {
     components : {
@@ -80,6 +85,7 @@ export default {
         DrawerDiv,
         SignupDiv
     },
+    mixins : [ConfirmMixin],
     data () {
         return {
             appName : "Check",
@@ -92,7 +98,8 @@ export default {
             status : "using",
             localStore : null,
             username : "",
-            stateStore : null
+            stateStore : null,
+            mainStore : null
         }
     },
     computed : {
@@ -117,22 +124,38 @@ export default {
         }
     },
     mounted () {
-        this.buildFromStorage();
-        this.currentChecklistKey = this.checklistKeys[0];
-        this.stateStore = StoreLocal.build("checklist-state");
-        let key = this.stateStore.getItem("currentChecklist")
-        if (key) {
-            this.currentChecklistKey = key;
-        }
+        let self = this;
+        this.mainStore = new MainStorage({});
+        debugger;
+        ipc.on("new-data-opened",function(event, arg) {
+            debugger;
+            console.log("received from main");
+            console.log(arg);
+            self.updateFromData();
+        });
+        this.updateFromData ();
     },
     methods : {
+        updateFromData () {
+            debugger;
+            let indexName = "checklists";
+            this.localStore = StorageWrapper.build(this.mainStore, indexName);
+            this.buildFromStorage();
+            this.currentChecklistKey = this.checklistKeys[0];
+            this.stateStore = StorageWrapper.build(this.mainStore, "state");
+            let key = this.stateStore.getItem("currentChecklist");
+            if (key) {
+                this.currentChecklistKey = key;
+            }
+        },
         toggleItemDone (key) {
             let item = this.currentChecklistObject.items.filter(item => item.key == key)[0];
-            window.item = item;
             if (item.done == true) {
-                if(confirm("Uncheck this item?", this.appName)) {
+                
+                if(this.confirmModal("Uncheck this item?")) {
                     item.done = false;
                 }
+
             } else {
                 this.$set(item, "done", true);
                 let t = new Date();
@@ -141,7 +164,7 @@ export default {
             this.persist();
         },
         resetThisChecklist () {
-            if (confirm("Reset the current checklist?", this.appName)) {
+            if (this.confirmModal("Reset the current checklist?")) {
                 let list = this.currentChecklistObject.items;
                 for (let i = 0; i < list.length; i++) {
                     list[i].done = false;
@@ -150,9 +173,10 @@ export default {
             }
         },
         buildFromStorage () {
-            let indexName = "checklists";
+            
             try {
-                this.localStore = StoreLocal.build(indexName);
+               
+
                 let storedChecklistsIndex = this.localStore.getIndex();
 
                 for (let i = 0; i < storedChecklistsIndex.length; i++) {
@@ -168,10 +192,13 @@ export default {
                         this.localStore.removeItem(key)
                         throw new Error();
                     }
+                    debugger;
                     this.$set(this.checklists, key, checklist);
                 }
             } catch (e) {
-                alert("There was an error accessing local storage.  Please refresh.");
+                debugger;
+                console.log(e);
+                this.alertModal("There was an error accessing your checklist file.  Please refresh.");
             }
         },
         persist () {
@@ -215,7 +242,7 @@ export default {
             this.status = "new";
         },
         deleteThisChecklist () {
-            if (confirm("Delete this checklist?  (There is no undo.)", this.appName)) {
+            if (this.confirmModal("Delete the current checklist?  (There is no undo.)", this.appName)) {
                 this.localStore.removeItem(this.currentChecklistKey);
                 this.$delete(this.checklists, this.currentChecklistKey);
                 this.currentChecklistKey = this.checklistKeys[0];
